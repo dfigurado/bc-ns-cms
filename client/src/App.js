@@ -3,8 +3,8 @@ import axios from "axios";
 import "./App.css";
 
 import AppBar from "./components/AppBar";
-import AddCMSBlock from "./components/AddCMSBlock";
 import CMSBlocks from "./components/CMSBlocks";
+import AddCMSBlock from "./components/AddCMSBlock";
 
 class App extends Component {
   state = {
@@ -13,9 +13,9 @@ class App extends Component {
 
   componentWillMount = async () => {
     console.log(this.props.location);
-    const responce = await axios.get("/api/cms");
+    const response = await axios.get("/api/cms");
     this.setState({
-      cmsBlocks: responce.data
+      cmsBlocks: response.data
     });
   };
 
@@ -33,7 +33,7 @@ class App extends Component {
 
     try {
       console.log(this.props.location);
-      const responce = await axios.post("/api/cms", newBlock);
+      const response = await axios.post("/api/cms", newBlock);
 
       this.setState({
         cmsBlocks: [newBlock, ...this.state.cmsBlocks]
@@ -46,7 +46,7 @@ class App extends Component {
   //delete an exsiting cms block.
   deleteBlock = async id => {
     try {
-      const responce = await axios.delete("/api/cms", {
+      const response = await axios.delete("/api/cms", {
         data: { id }
       });
       this.setState({
@@ -60,7 +60,7 @@ class App extends Component {
   //edit an exsiting cms block
   editCMSBlock = (id, data) => {
     try {
-      const responce = axios.put(`/api/cms/${id}`, data);
+      const response = axios.put(`/api/cms/${id}`, data);
 
       this.setState({
         cmsBlocks: this.state.cmsBlocks.map(block => {

@@ -1,7 +1,7 @@
 const router = require("express-promise-router")();
 const SectionController = require("../controllers/sectionController");
 
-router.get('/',SectionController.findAll)
+router.get('/',SectionController.findAll);
 /**
 router.get('/:id',SectionController.findById)
 router.post('/',SectionController.create)

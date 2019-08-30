@@ -6,15 +6,14 @@ const db = require("../models/index");
 const site = db.Site;
 
 router.get("/auth/:hashCode", BcController.auth);
-router.get(
-  "/load/:clientId",
+router.get("/load/:clientId",
   async (req, res, next) => {
     try {
       //Middleware
-      var clientId = req.params.clientId;
-      var host = `${req.headers["x-forwarded-proto"]}://${req.headers.host}`;
+      const clientId = req.params.clientId;
+      const host = `${req.headers["x-forwarded-proto"]}://${req.headers.host}`;
       //Get the client by id.
-      var client = await axios.get(`${host}/api/client/${clientId}`);
+      let client = await axios.get(`${host}/api/client/${clientId}`);
       //Set client specific parameters.
       client = client.data.rows[0];
       const bcSetting = {
@@ -23,13 +22,14 @@ router.get(
         clientId: client.bcClientId,
         secret: client.bcClientSecret
       };
-      //Craete Bigcomerce object
+      // Create BigCommerce object
       const bigCommerce = new BigCommerce(bcSetting);
-      //verify
+      // BigCommerce Verification
       const data = bigCommerce.verify(req.query["signed_payload"]);
-      var storeHash = data.store_hash; //Store hash
+      //Store hash
+      const storeHash = data.store_hash;
       //Get the site id by store hash
-      var clientSite = await site.findOne({
+      const clientSite = await site.findOne({
         where: {
           client_id: req.params.clientId,
           store_hash: storeHash

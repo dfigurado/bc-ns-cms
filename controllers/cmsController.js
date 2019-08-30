@@ -2,22 +2,22 @@ const db = require("../models/index");
 const block = db.Block;
 const site = db.Site;
 //var storehash = req.session.storehash;
+
 module.exports = {
   findAll: async (req, res, next) => {
-    var storehash =
-      req.session.store_hash != undefined
-        ? req.session.store_hash
-        : req.params.hash;
+    const result = await block.findAll({
+      include: [
+        {
+          model: site,
+          attributes: ["store_hash"],
+          where: { store_hash: storehash }
+        }
+      ]
+    });
+    const storehash = req.session.store_hash !== undefined
+            ? req.session.store_hash
+            : req.params.hash;
     try {
-      var result = await block.findAll({
-        include: [
-          {
-            model: site,
-            attributes: ["store_hash"],
-            where: { store_hash: storehash }
-          }
-        ]
-      });
     } catch (error) {
       console.log(error);
     }
@@ -25,8 +25,8 @@ module.exports = {
     res.json(result);
   },
   findById: async (req, res, next) => {
-    var siteId = req.session.site_id;
-    var result = await block.findAll({
+    const siteId = req.session.site_id;
+    const result = await block.findAll({
       where: {
         id: req.params.id,
         site_id: siteId
@@ -35,14 +35,14 @@ module.exports = {
     res.json(result);
   },
   create: async (req, res, next) => {
-    var siteId = req.session.site_id;
+    const siteId = req.session.site_id;
     req.body.site_id = siteId;
-    var result = await block.create(req.body);
+    const result = await block.create(req.body);
     res.json(result);
   },
   update: async (req, res, next) => {
-    var siteId = req.session.site_id;
-    var result = await block.update(req.body, {
+    const siteId = req.session.site_id;
+    const result = await block.update(req.body, {
       where: {
         id: req.params.id,
         site_id: siteId
@@ -51,8 +51,8 @@ module.exports = {
     res.json(result);
   },
   delete: async (req, res, next) => {
-    var siteId = req.session.site_id;
-    var result = await block.destroy({
+    const siteId = req.session.site_id;
+    const result = await block.destroy({
       where: {
         id: req.body.id,
         site_id: siteId
