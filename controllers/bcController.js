@@ -9,11 +9,12 @@ const bcSetting = {
   callback: process.env.BC_CALLBACK,
   responseType: "json"
 };
+
 //Get user by hash code.
-var getClient = async (host, hashCode) => {
+const getClient = async (host, hashCode) => {
   try {
-    var path = `${host}/api/client/get-by-hash/${hashCode}`;
-    var client = await axios.get(path);
+    const path = `${host}/api/client/get-by-hash/${hashCode}`;
+    const client = await axios.get(path);
     if (client.data.count === 1) {
       //Client exist
       return client.data.rows[0];
@@ -28,16 +29,19 @@ var getClient = async (host, hashCode) => {
   }
 };
 
-var appOptions = {
+const appOptions = {
   root: __dirname + "/../public/"
 };
-var options = {
+
+const options = {
   root: __dirname + "/../client/build"
 };
+
 //auth
-var auth = async (req, res, next) => {
-  var host = `${req.headers["x-forwarded-proto"]}://${req.headers.host}`;
-  var client = await getClient(host, req.params.hashCode); //get the client
+const auth = async (req, res, next) => {
+  const host = `${req.headers["x-forwarded-proto"]}://${req.headers.host}`;
+  //get the client
+  const client = await getClient(host, req.params.hashCode);
   if (client) {
     //Set client specific parameters.
     bcSetting.clientId = client.bcClientId;
@@ -45,9 +49,12 @@ var auth = async (req, res, next) => {
     bcSetting.callback = `${host}/bc/auth/${req.params.hashCode}`;
   }
   try {
-    var bigCommerce = new BigCommerce(bcSetting); //Craete Bigcomerce object
-    var data = await bigCommerce.authorize(req.query); //Bigcommerce authorize
-    var storehash = data.context.split("/")[1]; //Getting the store hash
+    // Create BigCommerce object
+    const bigCommerce = new BigCommerce(bcSetting);
+    // BigCommerce authorize
+    const data = await bigCommerce.authorize(req.query);
+    //Getting the store hash
+    const storehash = data.context.split("/")[1];
 
     //Find of create site.
     const [clientSite, created] = await site.findOrCreate({
@@ -58,24 +65,24 @@ var auth = async (req, res, next) => {
     });
     //Save store information as a encoded string - Start
     //Add salt
-    var salt = process.env.SECRET_KEY;
-
+    const salt = process.env.SECRET_KEY;
     //Convert json to a string and add salt.
-    var buf = Buffer.from(JSON.stringify(data));
+    const buf = Buffer.from(JSON.stringify(data));
     //Base 64 encode
-    var encoded = buf.toString("base64");
-    var result = await site.update(
-      { site_info: encoded },
-      {
-        where: {
-          client_id: client.id,
-          store_hash: storehash
+    const encoded = buf.toString("base64");
+    const result = await site.update(
+        {site_info: encoded},
+        {
+          where: {
+            client_id: client.id,
+            store_hash: storehash
+          }
         }
-      }
     );
-    //Save store information as a encoded string - End
 
-    var siteId = clientSite.id;
+    //Save store information as a encoded string - End
+    const siteId = clientSite.id;
+
     //Set sessions
     req.session.access_token = data.access_token;
     req.session.site_id = siteId;
@@ -85,14 +92,15 @@ var auth = async (req, res, next) => {
     bcSetting.storeHash = storehash;
     bcSetting.apiVersion = "v3";
 
-    var bc = new BigCommerce({
+    const bc = new BigCommerce({
       clientId: client.bcClientId,
       accessToken: data.access_token,
       storeHash: storehash,
       responseType: "json",
       apiVersion: "v3"
     });
-    var scriptData = {
+
+    const scriptData = {
       name: "Ns CMS Block",
       description: "CMS Block load the content from the API",
       html: `<script>
@@ -100,8 +108,8 @@ var auth = async (req, res, next) => {
             .then(function (res) { return res.json(); })
             .then(function (blocks) { 
               blocks.forEach(function (block) { 
-                var pid = block.page_id;
-                var sid = block.section_id;
+                const pid = block.page_id;
+                const sid = block.section_id;
                     var ele = document.querySelector("#cms-block-"+pid+"-"+sid); 
                     ele.innerHTML = block.content; }); 
         }).catch(function (err) {
@@ -116,21 +124,21 @@ var auth = async (req, res, next) => {
       kind: "script_tag"
     };
     try {
-      var response = await bc.post("/content/scripts", scriptData);
+      const response = await bc.post("/content/scripts", scriptData);
     } catch (e) {
       console.log(e);
     }
 
-    //Show instalation success message.
+    //Show installation success message.
     res.sendFile("images/success.png", appOptions);
   } catch (error) {
     console.log(error);
-    //Show unsuccessfull message.
+    //Show unsuccessful message.
     res.sendFile("images/error.png", appOptions);
   }
 };
 //load
-var load = async (req, res, next) => {
+const load = async (req, res, next) => {
   try {
     res.sendFile("index.html", options);
   } catch (error) {

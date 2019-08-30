@@ -2,12 +2,13 @@ const crypto = require("crypto");
 
 const db = require("../models/index");
 const block = db.Client;
+
 module.exports = {
   findAll: async (req, res, next) => {
     block.findAll().then(result => res.json(result));
   },
   findById: async (req, res, next) => {
-    var result = await block.findAndCountAll({
+    const result = await block.findAndCountAll({
       where: {
         id: req.params.id
       },
@@ -16,7 +17,7 @@ module.exports = {
     res.json(result);
   },
   findByHash: async (req, res, next) => {
-    var result = await block.findAndCountAll({
+    const result = await block.findAndCountAll({
       where: {
         hashCode: req.params.id
       },
@@ -38,7 +39,7 @@ module.exports = {
       .then(result => res.json(result));
   },
   delete: async (req, res, next) => {
-    var result = await block.destroy({
+    const result = await block.destroy({
       where: {
         id: req.body.id
       }
